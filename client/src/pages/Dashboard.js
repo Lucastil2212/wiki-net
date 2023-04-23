@@ -3,6 +3,7 @@ import { TextField, Button, IconButton } from "@mui/material";
 import axios from "axios";
 import NotesIcon from "@mui/icons-material/Notes";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import NetworkGraph from "../NetworkGraph";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
@@ -124,7 +125,9 @@ export default function Dashboard() {
             margin: "1% 1% 1% 1%",
           }}
           hidden
-        ></div>
+        >
+          <NetworkGraph />
+        </div>
         <div id="notesDisplay" style={{ margin: "1% 1% 1% 1%" }} hidden>
           <TextField
             id="notes"
