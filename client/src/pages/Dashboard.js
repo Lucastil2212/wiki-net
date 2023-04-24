@@ -4,6 +4,8 @@ import axios from "axios";
 import NotesIcon from "@mui/icons-material/Notes";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
 import NetworkGraph from "../NetworkGraph";
+import Login from "../components/loginModal";
+import SignUp from "../components/signUpModal";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
@@ -12,6 +14,11 @@ export default function Dashboard() {
   const [notesVisible, setNotesVisible] = useState(false);
 
   const [currentWikiPage, setCurrentWikiPage] = useState("");
+
+  const [currentUser, setCurrentUser] = useState("");
+
+  const [openSignUp, setOpenSignUp] = useState(false);
+  const [openLogin, setOpenLogin] = useState(false);
 
   const handleSearchTextChange = (event) => {
     setSearch(event.target.value);
@@ -22,6 +29,21 @@ export default function Dashboard() {
     setSearch("");
   };
 
+  const handleCloseSignUp = () => {
+    setOpenSignUp(false);
+  };
+
+  const handleCloseLogin = () => {
+    setOpenLogin(false);
+  };
+
+  const handleOpenSignUp = () => {
+    setOpenSignUp(true);
+  };
+
+  const handleOpenLogin = () => {
+    setOpenLogin(true);
+  };
   const fetchWikiPage = (name) => {
     setCurrentWikiPage(name);
 
@@ -115,6 +137,32 @@ export default function Dashboard() {
         >
           <NotesIcon />
         </IconButton>
+        {currentUser === "" ? (
+          <Button
+            sx={{ marginLeft: "2%" }}
+            variant="contained"
+            color="primary"
+            id="login"
+            onClick={() => handleOpenLogin()}
+          >
+            Login
+          </Button>
+        ) : (
+          `Welcome ${currentUser}`
+        )}
+        {currentUser === "" ? (
+          <Button
+            sx={{ marginLeft: "1%" }}
+            variant="contained"
+            color="primary"
+            id="signup"
+            onClick={() => handleOpenSignUp()}
+          >
+            Sign Up
+          </Button>
+        ) : (
+          ""
+        )}
       </div>
       <div>
         <div
@@ -147,6 +195,8 @@ export default function Dashboard() {
           }}
         ></div>
       </div>
+      <SignUp open={openSignUp} handleClose={handleCloseSignUp} />
+      <Login open={openLogin} handleClose={handleCloseLogin} />
     </div>
   );
 }
