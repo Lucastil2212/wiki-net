@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
+import axios from "axios";
 
-export default function Login({ open, handleClose }) {
+export default function Login({ open, handleClose, setCurrentUser }) {
   const style = {
     position: "absolute",
     top: "50%",
@@ -19,11 +20,30 @@ export default function Login({ open, handleClose }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [loginError, setLoginError] = useState(false);
+
   const handleUserNameChange = (e) => {
     setUsername(e.target.value);
   };
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
+  };
+
+  const submitLogin = () => {
+    axios
+      .post("http://localhost:3001/login", {
+        username: username,
+        password: password,
+      })
+      .then((response) => {
+        console.log(response);
+        setCurrentUser(response.data.user.username);
+        handleClose();
+      })
+      .catch((err) => {
+        setLoginError(true);
+        console.log(err);
+      });
   };
 
   return (
@@ -46,9 +66,12 @@ export default function Login({ open, handleClose }) {
           onChange={handlePasswordChange}
           required
         />
-        <Button id="login" variant="contained">
+        <Button id="login" variant="contained" onClick={submitLogin}>
           Login
         </Button>
+        {loginError && (
+          <h3 style={{ color: "red" }}>Wrong username and/or password!</h3>
+        )}
       </Box>
     </Modal>
   );

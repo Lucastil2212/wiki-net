@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
+import axios from "axios";
 
-export default function SignUp({ open, handleClose }) {
+export default function SignUp({ open, handleClose, setCurrentUser }) {
   const style = {
     position: "absolute",
     top: "50%",
@@ -18,13 +19,45 @@ export default function SignUp({ open, handleClose }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [passwordError, setPasswordError] = useState(false);
+
+  const [usernameError, setUsernameError] = useState(false);
+  const [usernameErrorText, setUsernameErrorText] = useState("");
+
   const handleUserNameChange = (e) => {
+    setUsernameError(false);
     setUsername(e.target.value);
   };
   const handlePasswordChange = (e) => {
+    setPasswordError(false);
     setPassword(e.target.value);
   };
+  const submitSignUp = () => {
+    if (password.length < 5) {
+      setPasswordError(true);
+      return;
+    }
 
+    if (username.length < 3) {
+      setUsernameError(true);
+      setUsernameErrorText("Username is too short!");
+    }
+    axios
+      .post("http://localhost:3001/createUser", {
+        username: username,
+        password: password,
+      })
+      .then((response) => {
+        console.log(response);
+        setCurrentUser(response.data.user.username);
+        handleClose();
+      })
+      .catch((err) => {
+        console.log(err);
+        setUsernameError(true);
+        setUsernameErrorText("Username already exists!");
+      });
+  };
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="modal-title">
       <Box sx={{ ...style }}>
@@ -36,6 +69,8 @@ export default function SignUp({ open, handleClose }) {
           label="Create Username"
           value={username}
           onChange={handleUserNameChange}
+          error={usernameError}
+          helperText={usernameError ? usernameErrorText : ""}
           required
         />
         <TextField
@@ -43,9 +78,11 @@ export default function SignUp({ open, handleClose }) {
           label="Create Password"
           value={password}
           onChange={handlePasswordChange}
+          error={passwordError}
+          helperText={passwordError ? "Password must be longer!" : ""}
           required
         />
-        <Button id="login" variant="contained">
+        <Button id="login" variant="contained" onClick={submitSignUp}>
           Sign Up
         </Button>
       </Box>

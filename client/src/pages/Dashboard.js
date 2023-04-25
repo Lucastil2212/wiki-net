@@ -133,13 +133,12 @@ export default function Dashboard() {
           color="primary"
           variant="contained"
           onClick={toggleNotes}
-          sx={{ margin: "1% 0% 1%" }}
+          sx={{ margin: "1% 2% 1% 1%" }}
         >
           <NotesIcon />
         </IconButton>
         {currentUser === "" ? (
           <Button
-            sx={{ marginLeft: "2%" }}
             variant="contained"
             color="primary"
             id="login"
@@ -195,8 +194,16 @@ export default function Dashboard() {
           }}
         ></div>
       </div>
-      <SignUp open={openSignUp} handleClose={handleCloseSignUp} />
-      <Login open={openLogin} handleClose={handleCloseLogin} />
+      <SignUp
+        open={openSignUp}
+        handleClose={handleCloseSignUp}
+        setCurrentUser={setCurrentUser}
+      />
+      <Login
+        open={openLogin}
+        handleClose={handleCloseLogin}
+        setCurrentUser={setCurrentUser}
+      />
     </div>
   );
 }
