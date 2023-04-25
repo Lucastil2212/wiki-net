@@ -66,3 +66,46 @@ app.post("/login", (req, res, next) => {
 const userExists = () => {
   return false;
 };
+
+app.post("/createNetwork", (req, res, next) => {
+  const body = req.body;
+
+  const networkName = body.networkName;
+  const userName = body.userName;
+
+  db("network")
+    .insert({
+      network_name: networkName,
+      user_name: userName,
+      notes: "",
+    })
+    .then(() => {
+      res.status(201).send("Created Network!");
+    })
+    .cathc((err) => {
+      next(err);
+    });
+});
+
+app.post("addNode", (req, res, next) => {
+  const body = req.body;
+
+  const nodeName = body.nodeName;
+  const newtorkName = body.newtorkName;
+  const to = body.to;
+  const from = body.from;
+  db("")
+    .insert({
+      node_name: nodeName,
+      newtork_name: newtorkName,
+      notes: "",
+      to: to,
+      from: from,
+    })
+    .then(() => {
+      res.status(201).send("Added node!");
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
