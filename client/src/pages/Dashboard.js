@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, IconButton } from "@mui/material";
 import axios from "axios";
 import NotesIcon from "@mui/icons-material/Notes";
@@ -113,9 +113,6 @@ export default function Dashboard() {
     setEdgeData([...newCleanEdgeData]);
 
     setNotes("");
-
-    console.log(newNodeData);
-    console.log(newEdgeData);
 
     axios
       .post("http://localhost:3001/updateNetwork", {
