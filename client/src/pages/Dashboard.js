@@ -58,20 +58,27 @@ export default function Dashboard() {
   const createNetwork = (name) => {
     setNotes("");
 
+    setNodeData([]);
+    setEdgeData([]);
+
+    setNoteData([]);
     setCurrentNetworkName(name);
 
     const newNodeData = [{ id: 0, label: name }];
 
     setNodeData(newNodeData);
 
+    console.log(newNodeData);
+    console.log(edgeData);
+
     axios
       .post("http://localhost:3001/createNetwork", {
         networkName: name,
         userName: currentUser,
         data: {
-          nodeData: JSON.stringify(nodeData),
+          nodeData: JSON.stringify(newNodeData),
           edgeData: JSON.stringify(edgeData),
-          notes: JSON.stringify(notes),
+          notes: JSON.stringify(noteData),
         },
       })
       .then((response) => {
@@ -86,21 +93,27 @@ export default function Dashboard() {
     const newNodeData = [...nodeData];
     const newEdgeData = [...edgeData];
 
-    let index = nodeData.length;
+    console.log(newNodeData);
+    console.log(newEdgeData);
+
+    let index = nodeData.length + 1;
 
     newNodeData.push({
-      id: index + 1,
+      id: index,
       label: page,
     });
 
-    newEdgeData.push({ to: index + 1, from: nodeIndex });
+    newEdgeData.push({ to: index, from: nodeIndex });
 
-    setNodeIndex(index + 1);
+    setNodeIndex(index);
 
-    setNodeData(newNodeData);
-    setEdgeData(newEdgeData);
+    setNodeData([...newNodeData]);
+    setEdgeData([...newEdgeData]);
 
     setNotes("");
+
+    console.log(newNodeData);
+    console.log(newEdgeData);
 
     axios
       .post("http://localhost:3001/updateNetwork", {
@@ -109,7 +122,7 @@ export default function Dashboard() {
         data: {
           nodeData: JSON.stringify(newNodeData),
           edgeData: JSON.stringify(newEdgeData),
-          notes: JSON.stringify(notes),
+          notes: JSON.stringify(noteData),
         },
       })
       .then((response) => console.log(response))
@@ -266,7 +279,12 @@ export default function Dashboard() {
           }}
           hidden
         >
-          <NetworkGraph />
+          <NetworkGraph
+            edgeData={edgeData}
+            nodeData={nodeData}
+            currentWikiPage={currentWikiPage}
+            setCurrentWikiPage={setCurrentWikiPage}
+          />
         </div>
         <div id="notesDisplay" style={{ margin: "1% 1% 1% 1%" }} hidden>
           <TextField

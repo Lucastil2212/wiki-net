@@ -131,23 +131,6 @@ app.get("/network", (req, res, next) => {
     });
 });
 
-app.get("node", (req, res, next) => {
-  const body = req.body;
-
-  const userName = body.userName;
-  const nodeName = body.nodeName;
-
-  db.select("*")
-    .from("node")
-    .where({ user_name: userName, node_name: nodeName })
-    .then((node) => {
-      res.status(200).send({ node });
-    })
-    .catch((err) => {
-      next(err);
-    });
-});
-
 app.post("/updateNetwork", (req, res, next) => {
   const body = req.body;
 
@@ -157,7 +140,7 @@ app.post("/updateNetwork", (req, res, next) => {
   const data = body.data;
 
   db("network")
-    .where({ user_name: userName, network_name: networkName })
+    .where({ network_name: networkName, user_name: userName })
     .update({ data: data })
     .then(() => {
       res.status(200).send("Updated notes!");
