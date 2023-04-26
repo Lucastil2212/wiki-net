@@ -6,6 +6,8 @@ import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
 import NetworkGraph from "../components/NetworkGraph";
 import Login from "../components/loginModal";
 import SignUp from "../components/signUpModal";
+import FolderIcon from "@mui/icons-material/Folder";
+import Projects from "../components/projectsModal";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
@@ -19,6 +21,7 @@ export default function Dashboard() {
 
   const [openSignUp, setOpenSignUp] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
+  const [openProjects, setOpenProjects] = useState(false);
 
   const [currentNetworkName, setCurrentNetworkName] = useState("");
 
@@ -29,6 +32,8 @@ export default function Dashboard() {
   const [notes, setNotes] = useState("");
 
   const [networkCreated, setNetworkCreated] = useState(false);
+
+  const [networks, setNetworks] = useState([]);
 
   useEffect(() => {
     fetchWikiPage(currentWikiPage);
@@ -61,6 +66,15 @@ export default function Dashboard() {
   const handleOpenLogin = () => {
     setOpenLogin(true);
   };
+
+  const handleOpenProjects = () => {
+    getNetworks();
+    setOpenProjects(true);
+  };
+
+  const handleCloseProjects = () => {
+    setOpenProjects(false);
+  };
   const createRoot = (name) => {
     console.log("CREATE ROOOT");
     setNotes("");
@@ -79,8 +93,29 @@ export default function Dashboard() {
 
     console.log(nodeData);
     console.log(edgeData);
+  };
 
-    setCurrentNetworkName(name);
+  const getNetworks = () => {
+    if (currentUser === "") return;
+    axios
+      .get("http://localhost:3001/networks", {
+        userName: currentUser,
+      })
+      .then((response) => {
+        const data = JSON.parse(response.data);
+
+        const userNetworks = [];
+        data.forEach((row) => {
+          if (row["user_name"] === currentUser) {
+            userNetworks.push(row["network_name"]);
+          }
+        });
+
+        setNetworks(userNetworks);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const createNetwork = () => {
@@ -111,7 +146,9 @@ export default function Dashboard() {
           edges: JSON.stringify(edgeData),
         },
       })
-      .then((response) => console.log(response))
+      .then((response) => {
+        console.log(response);
+      })
       .catch((err) => console.log(err));
   };
 
@@ -248,6 +285,18 @@ export default function Dashboard() {
         >
           <NotesIcon />
         </IconButton>
+        {currentUser !== "" ? (
+          <IconButton
+            color="primary"
+            variant="contained"
+            onClick={() => handleOpenProjects()}
+            sx={{ margin: "1% 2% 1% 1%" }}
+          >
+            <FolderIcon />
+          </IconButton>
+        ) : (
+          ""
+        )}
         {currentUser === "" ? (
           <Button
             variant="contained"
@@ -284,20 +333,15 @@ export default function Dashboard() {
           }}
           hidden
         >
-          <Button
-            id="saveNetwork"
-            variant="contained"
-            color="primary"
-            onClick={networkCreated ? updateNetwork : createNetwork}
-          >
-            Save Network
-          </Button>
           <NetworkGraph
             edgeData={edgeData}
             nodeData={nodeData}
             currentWikiPage={currentWikiPage}
             setCurrentWikiPage={setCurrentWikiPage}
             nodeIndex={nodeIndex}
+            networkCreated={networkCreated}
+            updateNetwork={updateNetwork}
+            createNetwork={createNetwork}
           />
         </div>
         <div id="notesDisplay" style={{ margin: "1% 1% 1% 1%" }} hidden>
@@ -331,6 +375,12 @@ export default function Dashboard() {
         handleClose={handleCloseLogin}
         setCurrentUser={setCurrentUser}
       />
+      <Projects
+        open={openProjects}
+        handleClose={handleCloseProjects}
+        currentUser={currentUser}
+        networks={networks}
+      ></Projects>
     </div>
   );
 }

@@ -94,16 +94,13 @@ app.get("/networks", (req, res, next) => {
 
   const userName = body.userName;
 
+  console.log(userName);
+
   db.select("*")
     .from("network")
-    .where({ user_name: userName })
     .then((rows) => {
-      const networks = [];
-
-      rows.forEach((row) => {
-        networks.push(row);
-      });
-      res.status(200).json(JSON.stringify(networks));
+      console.log(JSON.stringify(rows));
+      res.status(200).json(JSON.stringify(rows));
     })
     .catch((err) => {
       next(err);
@@ -143,7 +140,7 @@ app.post("/updateNetwork", (req, res, next) => {
     .where({ network_name: networkName, user_name: userName })
     .update({ data: data })
     .then(() => {
-      res.status(200).send("Updated notes!");
+      res.status(200).send("Updated network!");
     })
     .catch((err) => {
       next(err);
