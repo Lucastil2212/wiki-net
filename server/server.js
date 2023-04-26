@@ -58,7 +58,7 @@ app.post("/login", (req, res, next) => {
 
       const user = rows[0];
       console.log(user);
-      res.json({ user });
+      res.status(200).json({ user });
     })
     .catch((err) => next(err));
 });
@@ -70,40 +70,97 @@ const userExists = () => {
 app.post("/createNetwork", (req, res, next) => {
   const body = req.body;
 
+  console.log(body);
   const networkName = body.networkName;
   const userName = body.userName;
+  const data = body.data;
 
   db("network")
     .insert({
       network_name: networkName,
       user_name: userName,
-      notes: "",
+      data: data,
     })
     .then(() => {
       res.status(201).send("Created Network!");
     })
-    .cathc((err) => {
+    .catch((err) => {
       next(err);
     });
 });
 
-app.post("addNode", (req, res, next) => {
+app.get("/networks", (req, res, next) => {
   const body = req.body;
 
-  const nodeName = body.nodeName;
-  const newtorkName = body.newtorkName;
-  const to = body.to;
-  const from = body.from;
-  db("")
-    .insert({
-      node_name: nodeName,
-      newtork_name: newtorkName,
-      notes: "",
-      to: to,
-      from: from,
+  const userName = body.userName;
+
+  db.select("*")
+    .from("network")
+    .where({ user_name: userName })
+    .then((rows) => {
+      const networks = [];
+
+      rows.forEach((row) => {
+        networks.push(row);
+      });
+      res.status(200).json(JSON.stringify(networks));
     })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+app.get("/network", (req, res, next) => {
+  const body = req.body;
+
+  const networkName = body.networkName;
+  const userName = body.userName;
+
+  db.select("*")
+    .from("network")
+    .where({ network_name: networkName, user_name: userName })
+    .then((rows) => {
+      rows.forEach((row) => {
+        network.push(row);
+      });
+
+      res.status(200).json(JSON.stringify(network));
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+app.get("node", (req, res, next) => {
+  const body = req.body;
+
+  const userName = body.userName;
+  const nodeName = body.nodeName;
+
+  db.select("*")
+    .from("node")
+    .where({ user_name: userName, node_name: nodeName })
+    .then((node) => {
+      res.status(200).send({ node });
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+app.post("/updateNetwork", (req, res, next) => {
+  const body = req.body;
+
+  console.log(body);
+  const userName = body.userName;
+  const networkName = body.networkName;
+  const data = body.data;
+
+  db("network")
+    .where({ user_name: userName, network_name: networkName })
+    .update({ data: data })
     .then(() => {
-      res.status(201).send("Added node!");
+      res.status(200).send("Updated notes!");
     })
     .catch((err) => {
       next(err);

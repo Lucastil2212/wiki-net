@@ -3,7 +3,7 @@ import { TextField, Button, IconButton } from "@mui/material";
 import axios from "axios";
 import NotesIcon from "@mui/icons-material/Notes";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
-import NetworkGraph from "../NetworkGraph";
+import NetworkGraph from "../components/NetworkGraph";
 import Login from "../components/loginModal";
 import SignUp from "../components/signUpModal";
 
@@ -20,11 +20,21 @@ export default function Dashboard() {
   const [openSignUp, setOpenSignUp] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
 
+  const [currentNetworkName, setCurrentNetworkName] = useState("");
+
+  const [nodeData, setNodeData] = useState([]);
+  const [edgeData, setEdgeData] = useState([]);
+  const [noteData, setNoteData] = useState([]);
+
+  const [notes, setNotes] = useState("");
+  const [nodeIndex, setNodeIndex] = useState(0);
+
   const handleSearchTextChange = (event) => {
     setSearch(event.target.value);
   };
 
   const handleSearch = () => {
+    createNetwork(search);
     fetchWikiPage(search);
     setSearch("");
   };
@@ -44,6 +54,69 @@ export default function Dashboard() {
   const handleOpenLogin = () => {
     setOpenLogin(true);
   };
+
+  const createNetwork = (name) => {
+    setNotes("");
+
+    setCurrentNetworkName(name);
+
+    const newNodeData = [{ id: 0, label: name }];
+
+    setNodeData(newNodeData);
+
+    axios
+      .post("http://localhost:3001/createNetwork", {
+        networkName: name,
+        userName: currentUser,
+        data: {
+          nodeData: JSON.stringify(nodeData),
+          edgeData: JSON.stringify(edgeData),
+          notes: JSON.stringify(notes),
+        },
+      })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const expandNetwork = async (page) => {
+    const newNodeData = [...nodeData];
+    const newEdgeData = [...edgeData];
+
+    let index = nodeData.length;
+
+    newNodeData.push({
+      id: index + 1,
+      label: page,
+    });
+
+    newEdgeData.push({ to: index + 1, from: nodeIndex });
+
+    setNodeIndex(index + 1);
+
+    setNodeData(newNodeData);
+    setEdgeData(newEdgeData);
+
+    setNotes("");
+
+    axios
+      .post("http://localhost:3001/updateNetwork", {
+        networkName: currentNetworkName,
+        userName: currentUser,
+        data: {
+          nodeData: JSON.stringify(newNodeData),
+          edgeData: JSON.stringify(newEdgeData),
+          notes: JSON.stringify(notes),
+        },
+      })
+      .then((response) => console.log(response))
+      .catch((err) => console.log(err));
+    fetchWikiPage(page);
+  };
+
   const fetchWikiPage = (name) => {
     setCurrentWikiPage(name);
 
@@ -66,11 +139,7 @@ export default function Dashboard() {
 
             const wikiPage = href.slice(2);
 
-            fetchWikiPage(wikiPage);
-
-            // if (!alreadyFetched(wikiPage)) {
-            //   addNode(wikiPage);
-            // }
+            expandNetwork(wikiPage);
           });
         });
       })
@@ -101,6 +170,30 @@ export default function Dashboard() {
     setNotesVisible(!notesVisible);
   };
 
+  const handleNotesChange = (e) => {
+    setNotes(e.target.value);
+  };
+
+  const saveNotes = () => {
+    const newNoteData = [...noteData];
+
+    newNoteData[nodeIndex] = notes;
+
+    setNoteData(newNoteData);
+
+    axios
+      .post("http://localhost:3001/updateNetwork", {
+        networkName: currentNetworkName,
+        userName: currentUser,
+        data: {
+          nodeData: JSON.stringify(nodeData),
+          edgeData: JSON.stringify(edgeData),
+          notes: JSON.stringify(newNoteData),
+        },
+      })
+      .then((response) => console.log(response))
+      .catch((err) => console.log(err));
+  };
   return (
     <div>
       <h1>Wiki-Net</h1>
@@ -181,9 +274,19 @@ export default function Dashboard() {
             margin="normal"
             label={`Notes on ${currentWikiPage}`}
             rows={6}
+            value={notes}
+            onChange={handleNotesChange}
             multiline
             fullWidth
           ></TextField>
+          <Button
+            id="saveNotes"
+            variant="contained"
+            color="primary"
+            onClick={() => saveNotes()}
+          >
+            Save notes
+          </Button>
         </div>
         <div
           id="pageDisplay"

@@ -1,8 +1,8 @@
 exports.up = function (knex) {
   return knex.schema.createTable("network", (table) => {
     table.string("network_name").primary();
-    table.integer("user_name");
-    table.string("notes");
+    table.string("user_name").primary();
+    table.json("data");
   });
 };
 
