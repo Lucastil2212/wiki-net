@@ -7,6 +7,7 @@ export default function NetworkGraph({
   nodeData,
   currentWikiPage,
   setCurrentWikiPage,
+  nodeIndex,
 }) {
   const containerRef = useRef(null);
 
@@ -24,10 +25,19 @@ export default function NetworkGraph({
     };
     const network = new Network(container, { nodes, edges }, options);
 
+    network.on("click", (params) => {
+      var clickedNodeId = params.nodes[0];
+      var clickedNode = nodes.get(clickedNodeId);
+
+      if (!clickedNode) return;
+
+      setCurrentWikiPage(clickedNode.label);
+      nodeIndex.current = clickedNode.id;
+    });
     return () => {
       network.destroy();
     };
-  }, [edgeData, nodeData, currentWikiPage, setCurrentWikiPage]);
+  }, [edgeData, nodeData, currentWikiPage, setCurrentWikiPage, nodeIndex]);
 
   return <div ref={containerRef} />;
 }

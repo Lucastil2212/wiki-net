@@ -24,12 +24,18 @@ export default function Dashboard() {
 
   const nodeData = useRef([]);
   const edgeData = useRef([]);
-  const noteData = useRef([]);
   const nodeIndex = useRef(0);
 
   const [notes, setNotes] = useState("");
 
   const [networkCreated, setNetworkCreated] = useState(false);
+
+  useEffect(() => {
+    fetchWikiPage(currentWikiPage);
+
+    const currNodeData = nodeData.current;
+    setNotes(currNodeData[nodeIndex.current]?.notes);
+  }, [currentWikiPage, nodeIndex]);
 
   const handleSearchTextChange = (event) => {
     setSearch(event.target.value);
@@ -63,16 +69,18 @@ export default function Dashboard() {
 
     nodeIndex.current = 0;
 
+    nodeData.current = [""];
+
     setCurrentNetworkName(name);
     setCurrentWikiPage(name);
     setNetworkCreated(false);
 
-    nodeData.current = [{ id: 0, label: name }];
+    nodeData.current = [{ id: 0, label: name, notes: "" }];
 
     console.log(nodeData);
     console.log(edgeData);
 
-    fetchWikiPage(name);
+    setCurrentNetworkName(name);
   };
 
   const createNetwork = () => {
@@ -84,7 +92,6 @@ export default function Dashboard() {
         data: {
           nodes: JSON.stringify(nodeData),
           edges: JSON.stringify(edgeData),
-          notes: JSON.stringify(noteData),
         },
       })
       .then((response) => {
@@ -102,7 +109,6 @@ export default function Dashboard() {
         data: {
           nodes: JSON.stringify(nodeData),
           edges: JSON.stringify(edgeData),
-          notes: JSON.stringify(noteData),
         },
       })
       .then((response) => console.log(response))
@@ -110,9 +116,6 @@ export default function Dashboard() {
   };
 
   const expandNetwork = (page) => {
-    console.log(nodeData.current);
-    console.log(edgeData.current);
-
     let index = nodeData.current.length;
 
     const fromIndex = nodeIndex.current;
@@ -122,21 +125,18 @@ export default function Dashboard() {
       {
         id: index,
         label: page,
+        notes: "",
       },
     ];
     let newEdgeData = [...edgeData.current, { to: index, from: fromIndex }];
 
     nodeIndex.current = index;
-
     nodeData.current = newNodeData;
     edgeData.current = newEdgeData;
 
-    console.log(nodeData.current);
-    console.log(edgeData.current);
-
     setNotes("");
 
-    fetchWikiPage(page);
+    setCurrentWikiPage(page);
   };
 
   const fetchWikiPage = (name) => {
@@ -192,29 +192,26 @@ export default function Dashboard() {
   };
 
   const handleNotesChange = (e) => {
-    setNotes(e.target.value);
+    const enteredNotes = e.target.value;
+    const oldNodeData = nodeData.current;
+
+    nodeData.current = updateNotesAtIndex(
+      oldNodeData,
+      nodeIndex.current,
+      enteredNotes
+    );
+    setNotes(enteredNotes);
   };
 
-  const saveNotes = () => {
-    const newNoteData = [...noteData.current];
+  function updateNotesAtIndex(jsonArray, index, newNote) {
+    if (index < 0 || index >= jsonArray.length) {
+      throw new Error("Index out of bounds");
+    }
 
-    newNoteData[nodeIndex] = notes;
+    jsonArray[index].notes = newNote;
 
-    noteData.current = newNoteData;
-
-    axios
-      .post("http://localhost:3001/updateNetwork", {
-        networkName: currentNetworkName,
-        userName: currentUser,
-        data: {
-          nodes: JSON.stringify(nodeData),
-          edges: JSON.stringify(edgeData),
-          notes: JSON.stringify(newNoteData),
-        },
-      })
-      .then((response) => console.log(response))
-      .catch((err) => console.log(err));
-  };
+    return jsonArray;
+  }
   return (
     <div>
       <h1>Wiki-Net</h1>
@@ -300,6 +297,7 @@ export default function Dashboard() {
             nodeData={nodeData}
             currentWikiPage={currentWikiPage}
             setCurrentWikiPage={setCurrentWikiPage}
+            nodeIndex={nodeIndex}
           />
         </div>
         <div id="notesDisplay" style={{ margin: "1% 1% 1% 1%" }} hidden>
@@ -313,14 +311,6 @@ export default function Dashboard() {
             multiline
             fullWidth
           ></TextField>
-          <Button
-            id="saveNotes"
-            variant="contained"
-            color="primary"
-            onClick={() => saveNotes()}
-          >
-            Save notes
-          </Button>
         </div>
         <div
           id="pageDisplay"
