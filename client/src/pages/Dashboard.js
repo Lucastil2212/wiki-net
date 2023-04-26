@@ -90,11 +90,8 @@ export default function Dashboard() {
   };
 
   const expandNetwork = async (page) => {
-    const newNodeData = [...nodeData];
-    const newEdgeData = [...edgeData];
-
-    console.log(newNodeData);
-    console.log(newEdgeData);
+    let newNodeData = [...nodeData];
+    let newEdgeData = [...edgeData];
 
     let index = nodeData.length + 1;
 
@@ -107,8 +104,13 @@ export default function Dashboard() {
 
     setNodeIndex(index);
 
+    const newCleanEdgeData = newEdgeData.map((edge) => {
+      const { id, ...otherProps } = edge;
+      return otherProps;
+    });
+
     setNodeData([...newNodeData]);
-    setEdgeData([...newEdgeData]);
+    setEdgeData([...newCleanEdgeData]);
 
     setNotes("");
 
@@ -120,8 +122,8 @@ export default function Dashboard() {
         networkName: currentNetworkName,
         userName: currentUser,
         data: {
-          nodeData: JSON.stringify(newNodeData),
-          edgeData: JSON.stringify(newEdgeData),
+          nodes: JSON.stringify(newNodeData),
+          edges: JSON.stringify(newCleanEdgeData),
           notes: JSON.stringify(noteData),
         },
       })
@@ -199,8 +201,8 @@ export default function Dashboard() {
         networkName: currentNetworkName,
         userName: currentUser,
         data: {
-          nodeData: JSON.stringify(nodeData),
-          edgeData: JSON.stringify(edgeData),
+          nodes: JSON.stringify(nodeData),
+          edges: JSON.stringify(edgeData),
           notes: JSON.stringify(newNoteData),
         },
       })
