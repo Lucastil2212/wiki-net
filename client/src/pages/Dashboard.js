@@ -29,13 +29,14 @@ export default function Dashboard() {
   const [notes, setNotes] = useState("");
   const [nodeIndex, setNodeIndex] = useState(0);
 
+  const [networkCreated, setNetworkCreated] = useState(false);
+
   const handleSearchTextChange = (event) => {
     setSearch(event.target.value);
   };
 
   const handleSearch = () => {
-    createNetwork(search);
-    fetchWikiPage(search);
+    createRoot(search);
     setSearch("");
   };
 
@@ -54,30 +55,38 @@ export default function Dashboard() {
   const handleOpenLogin = () => {
     setOpenLogin(true);
   };
-
-  const createNetwork = (name) => {
+  const createRoot = (name) => {
+    console.log("CREATE ROOOT");
     setNotes("");
 
-    setNodeData([]);
     setEdgeData([]);
-
     setNoteData([]);
+
+    setNodeIndex(0);
+
     setCurrentNetworkName(name);
+    setCurrentWikiPage(name);
+    setNetworkCreated(false);
 
     const newNodeData = [{ id: 0, label: name }];
 
     setNodeData(newNodeData);
 
-    console.log(newNodeData);
+    console.log(nodeData);
     console.log(edgeData);
 
+    fetchWikiPage(name);
+  };
+
+  const createNetwork = () => {
+    setNetworkCreated(true);
     axios
       .post("http://localhost:3001/createNetwork", {
-        networkName: name,
+        networkName: currentNetworkName,
         userName: currentUser,
         data: {
-          nodeData: JSON.stringify(newNodeData),
-          edgeData: JSON.stringify(edgeData),
+          nodes: JSON.stringify(nodeData),
+          edges: JSON.stringify(edgeData),
           notes: JSON.stringify(noteData),
         },
       })
@@ -88,51 +97,53 @@ export default function Dashboard() {
         console.log(error);
       });
   };
-
-  const expandNetwork = async (page) => {
-    let newNodeData = [...nodeData];
-    let newEdgeData = [...edgeData];
-
-    let index = nodeData.length + 1;
-
-    newNodeData.push({
-      id: index,
-      label: page,
-    });
-
-    newEdgeData.push({ to: index, from: nodeIndex });
-
-    setNodeIndex(index);
-
-    const newCleanEdgeData = newEdgeData.map((edge) => {
-      const { id, ...otherProps } = edge;
-      return otherProps;
-    });
-
-    setNodeData([...newNodeData]);
-    setEdgeData([...newCleanEdgeData]);
-
-    setNotes("");
-
+  const updateNetwork = () => {
     axios
       .post("http://localhost:3001/updateNetwork", {
         networkName: currentNetworkName,
         userName: currentUser,
         data: {
-          nodes: JSON.stringify(newNodeData),
-          edges: JSON.stringify(newCleanEdgeData),
+          nodes: JSON.stringify(nodeData),
+          edges: JSON.stringify(edgeData),
           notes: JSON.stringify(noteData),
         },
       })
       .then((response) => console.log(response))
       .catch((err) => console.log(err));
+  };
+
+  const expandNetwork = (page) => {
+    console.log(nodeData);
+    console.log(edgeData);
+    let index = nodeData.length;
+
+    const fromIndex = nodeIndex;
+
+    let newNodeData = [
+      ...nodeData,
+      {
+        id: index,
+        label: page,
+      },
+    ];
+    let newEdgeData = [...edgeData, { to: index, from: fromIndex }];
+
+    setNodeIndex(index);
+
+    setNodeData(newNodeData);
+    setEdgeData(newEdgeData);
+
+    console.log(newNodeData);
+    console.log(newEdgeData);
+
+    setNotes("");
+
     fetchWikiPage(page);
   };
 
   const fetchWikiPage = (name) => {
     setCurrentWikiPage(name);
 
-    // fetch(`get_wiki_page.php?search=${name}`)
     fetch(`https://en.wikipedia.org/w/rest.php/v1/page/${name}/html`)
       .then((response) => response.text())
       .then((html) => {
@@ -278,6 +289,14 @@ export default function Dashboard() {
           }}
           hidden
         >
+          <Button
+            id="saveNetwork"
+            variant="contained"
+            color="primary"
+            onClick={networkCreated ? updateNetwork : createNetwork}
+          >
+            Save Network
+          </Button>
           <NetworkGraph
             edgeData={edgeData}
             nodeData={nodeData}

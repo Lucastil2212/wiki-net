@@ -11,8 +11,14 @@ export default function NetworkGraph({
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const nodes = nodeData;
-    const edges = edgeData;
+    console.log(nodeData);
+    console.log(edgeData);
+
+    // create an array with nodes
+    var nodes = new DataSet(nodeData);
+
+    // create an array with edges
+    var edges = new DataSet(edgeData);
 
     const container = containerRef.current;
     const options = {
