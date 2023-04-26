@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { TextField, Button, IconButton } from "@mui/material";
 import axios from "axios";
 import NotesIcon from "@mui/icons-material/Notes";
@@ -22,12 +22,12 @@ export default function Dashboard() {
 
   const [currentNetworkName, setCurrentNetworkName] = useState("");
 
-  const [nodeData, setNodeData] = useState([]);
-  const [edgeData, setEdgeData] = useState([]);
-  const [noteData, setNoteData] = useState([]);
+  const nodeData = useRef([]);
+  const edgeData = useRef([]);
+  const noteData = useRef([]);
+  const nodeIndex = useRef(0);
 
   const [notes, setNotes] = useState("");
-  const [nodeIndex, setNodeIndex] = useState(0);
 
   const [networkCreated, setNetworkCreated] = useState(false);
 
@@ -59,18 +59,15 @@ export default function Dashboard() {
     console.log("CREATE ROOOT");
     setNotes("");
 
-    setEdgeData([]);
-    setNoteData([]);
+    edgeData.current = [];
 
-    setNodeIndex(0);
+    nodeIndex.current = 0;
 
     setCurrentNetworkName(name);
     setCurrentWikiPage(name);
     setNetworkCreated(false);
 
-    const newNodeData = [{ id: 0, label: name }];
-
-    setNodeData(newNodeData);
+    nodeData.current = [{ id: 0, label: name }];
 
     console.log(nodeData);
     console.log(edgeData);
@@ -113,28 +110,29 @@ export default function Dashboard() {
   };
 
   const expandNetwork = (page) => {
-    console.log(nodeData);
-    console.log(edgeData);
-    let index = nodeData.length;
+    console.log(nodeData.current);
+    console.log(edgeData.current);
 
-    const fromIndex = nodeIndex;
+    let index = nodeData.current.length;
+
+    const fromIndex = nodeIndex.current;
 
     let newNodeData = [
-      ...nodeData,
+      ...nodeData.current,
       {
         id: index,
         label: page,
       },
     ];
-    let newEdgeData = [...edgeData, { to: index, from: fromIndex }];
+    let newEdgeData = [...edgeData.current, { to: index, from: fromIndex }];
 
-    setNodeIndex(index);
+    nodeIndex.current = index;
 
-    setNodeData(newNodeData);
-    setEdgeData(newEdgeData);
+    nodeData.current = newNodeData;
+    edgeData.current = newEdgeData;
 
-    console.log(newNodeData);
-    console.log(newEdgeData);
+    console.log(nodeData.current);
+    console.log(edgeData.current);
 
     setNotes("");
 
@@ -198,11 +196,11 @@ export default function Dashboard() {
   };
 
   const saveNotes = () => {
-    const newNoteData = [...noteData];
+    const newNoteData = [...noteData.current];
 
     newNoteData[nodeIndex] = notes;
 
-    setNoteData(newNoteData);
+    noteData.current = newNoteData;
 
     axios
       .post("http://localhost:3001/updateNetwork", {
