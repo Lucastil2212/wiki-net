@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Box, Typography } from "@mui/material";
+import { Modal, Box, Typography, Button, IconButton } from "@mui/material";
 import axios from "axios";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-export default function Projects({ open, handleClose, currentUser, networks }) {
+export default function Projects({
+  open,
+  handleClose,
+  currentUser,
+  networks,
+  changeNetwork,
+  deleteNetwork,
+}) {
   const style = {
     position: "absolute",
     top: "50%",
@@ -17,6 +25,14 @@ export default function Projects({ open, handleClose, currentUser, networks }) {
     pb: 3,
   };
 
+  const handleClick = (networkName) => {
+    changeNetwork(networkName);
+  };
+
+  const handleDelete = (networkName) => {
+    deleteNetwork(networkName);
+  };
+
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="modal-title">
       <Box sx={{ ...style }}>
@@ -26,7 +42,25 @@ export default function Projects({ open, handleClose, currentUser, networks }) {
         {networks.length === 0
           ? "No Saved Projects"
           : networks.map((network) => {
-              return <div>{network}</div>;
+              return (
+                <div>
+                  <Button
+                    id={network}
+                    onClick={() => handleClick({ network })}
+                    sx={{ width: "90%" }}
+                  >
+                    {network}
+                  </Button>
+                  <IconButton
+                    id={`delete-${network}`}
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleDelete({ network })}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              );
             })}
       </Box>
     </Modal>

@@ -18,16 +18,20 @@ export default function NetworkGraph({
   const [center, setCenter] = useState(false);
 
   useEffect(() => {
+    console.log(edgeData);
+    console.log(nodeData);
     // create an array with nodes
     var nodes = new DataSet(nodeData.current);
 
     // create an array with edges
     var edges = new DataSet(edgeData.current);
+    nodes.update(nodeData);
+    edges.update(edgeData);
 
     const container = containerRef.current;
     const options = {
       width: "100%",
-      height: "400px",
+      height: "500px",
     };
     const network = new Network(container, { nodes, edges }, options);
     network.moveTo({ position: { x: 0, y: 0 }, scale: 1 });

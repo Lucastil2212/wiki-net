@@ -90,38 +90,10 @@ app.post("/createNetwork", (req, res, next) => {
 });
 
 app.get("/networks", (req, res, next) => {
-  const body = req.body;
-
-  const userName = body.userName;
-
-  console.log(userName);
-
   db.select("*")
     .from("network")
     .then((rows) => {
-      console.log(JSON.stringify(rows));
       res.status(200).json(JSON.stringify(rows));
-    })
-    .catch((err) => {
-      next(err);
-    });
-});
-
-app.get("/network", (req, res, next) => {
-  const body = req.body;
-
-  const networkName = body.networkName;
-  const userName = body.userName;
-
-  db.select("*")
-    .from("network")
-    .where({ network_name: networkName, user_name: userName })
-    .then((rows) => {
-      rows.forEach((row) => {
-        network.push(row);
-      });
-
-      res.status(200).json(JSON.stringify(network));
     })
     .catch((err) => {
       next(err);
@@ -131,7 +103,6 @@ app.get("/network", (req, res, next) => {
 app.post("/updateNetwork", (req, res, next) => {
   const body = req.body;
 
-  console.log(body);
   const userName = body.userName;
   const networkName = body.networkName;
   const data = body.data;
@@ -144,5 +115,22 @@ app.post("/updateNetwork", (req, res, next) => {
     })
     .catch((err) => {
       next(err);
+    });
+});
+
+app.post("/delete", (req, res, next) => {
+  const body = req.body;
+
+  const networkName = body.networkName;
+  const userName = body.userName;
+
+  db("network")
+    .where({ network_name: networkName, user_name: userName })
+    .del()
+    .then(function (rowsDeleted) {
+      res.status(204).send(rowsDeleted + " rows deleted");
+    })
+    .catch(function (error) {
+      console.error(error);
     });
 });

@@ -90,17 +90,12 @@ export default function Dashboard() {
     setNetworkCreated(false);
 
     nodeData.current = [{ id: 0, label: name, notes: "" }];
-
-    console.log(nodeData);
-    console.log(edgeData);
   };
 
   const getNetworks = () => {
     if (currentUser === "") return;
     axios
-      .get("http://localhost:3001/networks", {
-        userName: currentUser,
-      })
+      .get("http://localhost:3001/networks")
       .then((response) => {
         const data = JSON.parse(response.data);
 
@@ -125,8 +120,8 @@ export default function Dashboard() {
         networkName: currentNetworkName,
         userName: currentUser,
         data: {
-          nodes: JSON.stringify(nodeData),
-          edges: JSON.stringify(edgeData),
+          nodes: JSON.stringify(nodeData.current),
+          edges: JSON.stringify(edgeData.current),
         },
       })
       .then((response) => {
@@ -142,8 +137,8 @@ export default function Dashboard() {
         networkName: currentNetworkName,
         userName: currentUser,
         data: {
-          nodes: JSON.stringify(nodeData),
-          edges: JSON.stringify(edgeData),
+          nodes: JSON.stringify(nodeData.current),
+          edges: JSON.stringify(edgeData.current),
         },
       })
       .then((response) => {
@@ -249,6 +244,56 @@ export default function Dashboard() {
 
     return jsonArray;
   }
+
+  const changeNetwork = (network) => {
+    handleCloseProjects();
+
+    axios
+      .get("http://localhost:3001/networks")
+      .then((response) => {
+        const data = JSON.parse(response.data);
+
+        data.forEach((row) => {
+          console.log(row);
+          console.log(currentUser);
+          console.log(network.network);
+          if (
+            row["user_name"] === currentUser &&
+            row["network_name"] === network.network
+          ) {
+            const networkData = row["data"];
+
+            console.log(networkData);
+
+            const newNodeData = JSON.parse(networkData["nodes"]);
+            const newEdgeData = JSON.parse(networkData["edges"]);
+
+            nodeData.current = [...newNodeData];
+            edgeData.current = [...newEdgeData];
+            nodeIndex.current = 0;
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setCurrentWikiPage(network);
+    fetchWikiPage(network);
+    setCurrentNetworkName(network);
+  };
+
+  const deleteNetwork = (network) => {
+    handleCloseProjects();
+
+    axios
+      .post("http://localhost:3001/delete", { networkName: network })
+      .then(() => {
+        console.log("Successfully deleted network!");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   return (
     <div>
       <h1>Wiki-Net</h1>
@@ -380,6 +425,8 @@ export default function Dashboard() {
         handleClose={handleCloseProjects}
         currentUser={currentUser}
         networks={networks}
+        changeNetwork={changeNetwork}
+        deleteNetwork={deleteNetwork}
       ></Projects>
     </div>
   );
