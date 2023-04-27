@@ -297,7 +297,10 @@ export default function Dashboard() {
     handleCloseProjects();
 
     axios
-      .post("http://localhost:3001/delete", { networkName: network })
+      .post("http://localhost:3001/delete", {
+        networkName: network.network,
+        userName: currentUser,
+      })
       .then(() => {
         console.log("Successfully deleted network!");
       })
