@@ -31,7 +31,7 @@ export default function NetworkGraph({
     const container = containerRef.current;
     const options = {
       width: "100%",
-      height: "500px",
+      height: "450px",
     };
     const network = new Network(container, { nodes, edges }, options);
     network.moveTo({ position: { x: 0, y: 0 }, scale: 1 });
@@ -57,13 +57,14 @@ export default function NetworkGraph({
   ]);
 
   return (
-    <div>
+    <div style={{ marginTop: "1%" }}>
       <Button
         id="saveNetwork"
         variant="contained"
         color="primary"
         onClick={networkCreated ? updateNetwork : createNetwork}
         size="small"
+        sx={{ marginRight: "1%" }}
       >
         Save Network
       </Button>

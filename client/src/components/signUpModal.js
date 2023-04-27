@@ -71,6 +71,7 @@ export default function SignUp({ open, handleClose, setCurrentUser }) {
           onChange={handleUserNameChange}
           error={usernameError}
           helperText={usernameError ? usernameErrorText : ""}
+          sx={{ margin: "2% 1% 1%" }}
           required
         />
         <TextField
@@ -80,6 +81,7 @@ export default function SignUp({ open, handleClose, setCurrentUser }) {
           onChange={handlePasswordChange}
           error={passwordError}
           helperText={passwordError ? "Password must be longer!" : ""}
+          sx={{ margin: "2% 1% 1%" }}
           required
         />
         <Button id="login" variant="contained" onClick={submitSignUp}>

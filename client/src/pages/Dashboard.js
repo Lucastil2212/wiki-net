@@ -39,6 +39,7 @@ export default function Dashboard() {
     fetchWikiPage(currentWikiPage);
 
     const currNodeData = nodeData.current;
+    if (!currNodeData[nodeIndex.current]) return;
     setNotes(currNodeData[nodeIndex.current]?.notes);
   }, [currentWikiPage, nodeIndex]);
 
@@ -47,6 +48,13 @@ export default function Dashboard() {
   };
 
   const handleSearch = () => {
+    if (
+      !search ||
+      search.length === 0 ||
+      !currentUser ||
+      currentUser.length === 0
+    )
+      return;
     createRoot(search);
     setSearch("");
   };
@@ -227,6 +235,9 @@ export default function Dashboard() {
     const enteredNotes = e.target.value;
     const oldNodeData = nodeData.current;
 
+    if (!currentWikiPage || currentWikiPage.length === 0) return;
+    if (oldNodeData.length === 0) return;
+
     nodeData.current = updateNotesAtIndex(
       oldNodeData,
       nodeIndex.current,
@@ -322,14 +333,18 @@ export default function Dashboard() {
         >
           <AccountTreeOutlinedIcon />
         </IconButton>
-        <IconButton
-          color="primary"
-          variant="contained"
-          onClick={toggleNotes}
-          sx={{ margin: "1% 2% 1% 1%" }}
-        >
-          <NotesIcon />
-        </IconButton>
+        {currentWikiPage === "" || currentWikiPage === undefined ? (
+          <IconButton
+            color="primary"
+            variant="contained"
+            onClick={toggleNotes}
+            sx={{ margin: "1% 2% 1% 1%" }}
+          >
+            <NotesIcon />
+          </IconButton>
+        ) : (
+          ""
+        )}
         {currentUser !== "" ? (
           <IconButton
             color="primary"

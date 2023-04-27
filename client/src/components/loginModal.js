@@ -57,6 +57,7 @@ export default function Login({ open, handleClose, setCurrentUser }) {
           label="Enter Username"
           value={username}
           onChange={handleUserNameChange}
+          sx={{ margin: "2% 1% 1%" }}
           required
         />
         <TextField
@@ -64,6 +65,7 @@ export default function Login({ open, handleClose, setCurrentUser }) {
           label="Enters Password"
           value={password}
           onChange={handlePasswordChange}
+          sx={{ margin: "2% 1% 1%" }}
           required
         />
         <Button id="login" variant="contained" onClick={submitLogin}>
